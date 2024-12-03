@@ -16,6 +16,10 @@ namespace _2DPhysics
         public static readonly float MinDensity = 0.5f; //g/cm^3
         public static readonly float MaxDensity = 21.4f; //
 
+        //define min and max # of iterations allowed
+        public static readonly int minIterations = 1;
+        public static readonly int maxIterations = 128;
+
         private List<_2DBody> bodyList;
         private _2DVector gravity; //this is the acceleration due to gravity
 
@@ -56,50 +60,58 @@ namespace _2DPhysics
         }
 
         //
-        public void Step(float time)
+        public void Step(float time, int iterations)
         {
-            //movement step
-            for (int i = 0; i < this.bodyList.Count(); i++)
-            {
-                this.bodyList[i].Step(time, this.gravity);
-            }
+            //clamp # of iterations user has been through
+            iterations = _2DMath.Clamp(iterations, _2DWorld.minIterations, _2DWorld.maxIterations);
 
-            //collision step
-            for (int i = 0; i < this.bodyList.Count() - 1; i++)
+            for (int it = 0; it < iterations; it++)
             {
-                _2DBody bodyA = this.bodyList[i];
-
-                for (int j = i + 1; j < this.bodyList.Count(); j++)
+                //movement step
+                for (int i = 0; i < this.bodyList.Count(); i++)
                 {
-                    _2DBody bodyB = this.bodyList[j];
+                    this.bodyList[i].Step(time, this.gravity, iterations);
+                }
 
-                    if (bodyA.IsStatic && bodyB.IsStatic)
+                //collision step
+                for (int i = 0; i < this.bodyList.Count() - 1; i++)
+                {
+                    _2DBody bodyA = this.bodyList[i];
+
+                    for (int j = i + 1; j < this.bodyList.Count(); j++)
                     {
-                        continue;
-                    }
+                        _2DBody bodyB = this.bodyList[j];
 
-                    //
-                    if (this.Collide(bodyA, bodyB, out _2DVector normal, out float depth))
-                    {
-                        if (bodyA.IsStatic)
+                        if (bodyA.IsStatic && bodyB.IsStatic)
                         {
-                            bodyB.Move(normal * depth);
-                        }
-                        else if(bodyB.IsStatic)
-                        {
-                            bodyA.Move(-normal * depth);
-                        }
-                        else
-                        {
-                            bodyA.Move(-normal * depth / 2f);
-                            bodyB.Move(normal * depth / 2f);
+                            continue;
                         }
 
-                        //resolve 
-                        this.ResolveCollision(bodyA, bodyB, normal, depth);
+                        //
+                        if (this.Collide(bodyA, bodyB, out _2DVector normal, out float depth))
+                        {
+                            if (bodyA.IsStatic)
+                            {
+                                bodyB.Move(normal * depth);
+                            }
+                            else if (bodyB.IsStatic)
+                            {
+                                bodyA.Move(-normal * depth);
+                            }
+                            else
+                            {
+                                bodyA.Move(-normal * depth / 2f);
+                                bodyB.Move(normal * depth / 2f);
+                            }
+
+                            //resolve 
+                            this.ResolveCollision(bodyA, bodyB, normal, depth);
+                        }
                     }
                 }
             }
+
+            
         }
 
         //we will resolve collisions by applying "impulses"

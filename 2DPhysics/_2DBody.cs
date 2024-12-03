@@ -165,18 +165,20 @@ namespace _2DPhysics
             return this.transformedVerticies;
         }
 
-        internal void Step(float time, _2DVector gravity)
+        internal void Step(float time, _2DVector gravity, int iterations)
         {
+            if (this.IsStatic)
+            {
+                return;
+            }
+
+            time /= (float)iterations; //amount of time we want to move on this iteration (this means more accurate movement)
+
             // force = mass * acceleration
             // acc = force / mass
 
             //_2DVector acceleration = this.force / this.Mass;
             //this.linearVelocity += acceleration * time;
-
-            if (this.IsStatic)
-            {
-                return;
-            }
 
             this.linearVelocity += gravity * time;
 

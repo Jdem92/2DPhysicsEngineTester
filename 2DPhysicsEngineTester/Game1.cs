@@ -28,6 +28,8 @@ namespace _2DPhysicsEngineTester
 
         private Vector2[] vertexBuffer;
 
+        private Stopwatch watch;
+
         public Game1()
         {
             this.graphics = new GraphicsDeviceManager(this);
@@ -67,6 +69,8 @@ namespace _2DPhysicsEngineTester
 
             this.colors.Add(Color.DarkGreen);
             this.outlineColors.Add(Color.White);
+
+            this.watch = new Stopwatch();
 
             base.Initialize();
         }
@@ -120,6 +124,12 @@ namespace _2DPhysicsEngineTester
             
             if (Keyboard.IsKeyAvailable)
             {
+                if (Keyboard.IsKeyClicked(Keys.OemTilde))
+                {
+                    Console.WriteLine($"BodyCount: {this.world.BodyCount}");
+                    Console.WriteLine($"StepTime: {Math.Round(this.watch.Elapsed.TotalMilliseconds, 4)}");
+                }
+
                 if (Keyboard.IsKeyClicked(Keys.Escape))
                 {
                     this.Exit();
@@ -144,11 +154,6 @@ namespace _2DPhysicsEngineTester
                 //if (Keyboard.IsKeyDown(Keys.Up)) { dy++; }
                 //if (Keyboard.IsKeyDown(Keys.Down)) { dy--; }
 
-                //if(!this.world.GetBody(0, out _2DBody body))
-                //{
-                //    throw new Exception("Could not find the body at the specified index");
-                //}
-
                 //if(dx != 0f || dy != 0)
                 //{
                 //    _2DVector forceDirection = _2DMath.Normalize(new _2DVector(dx, dy));
@@ -157,9 +162,27 @@ namespace _2DPhysicsEngineTester
                 //}
             }
 
-            //
-            this.world.Step(FlatUtil.GetElapsedTimeInSeconds(gameTime));
 
+            //
+            this.watch.Restart();
+            this.world.Step(FlatUtil.GetElapsedTimeInSeconds(gameTime), 20);
+            this.watch.Stop();
+
+            this.camera.GetExtents(out _, out _, out float viewBottom, out _);
+
+            for (int i = 0; i < this.world.BodyCount; i++)
+            {
+                if (!this.world.GetBody(i, out _2DBody body))
+                {
+                    throw new ArgumentOutOfRangeException();
+                }
+
+                //#TODO: JD - finish body removal 12/2/24
+                //_2DAABB box = body.GetAABB();
+
+
+                
+            }
             
             base.Update(gameTime);
         }
