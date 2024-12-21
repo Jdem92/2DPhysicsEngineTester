@@ -22,6 +22,7 @@ namespace _2DPhysics
 
         private List<_2DBody> bodyList;
         private _2DVector gravity; //this is the acceleration due to gravity
+        private List<_2DManifold> contactList;
 
         public int BodyCount
         {
@@ -32,6 +33,7 @@ namespace _2DPhysics
         {
             this.gravity = new _2DVector(0f, -9.81f); //earth default
             this.bodyList = new List<_2DBody>();
+            this.contactList = new List<_2DManifold>();
         }
 
         //we need functions to add / remove bodies & actually get the bodies out of the list if we need to 
@@ -73,6 +75,8 @@ namespace _2DPhysics
                     this.bodyList[i].Step(time, this.gravity, iterations);
                 }
 
+                this.contactList.Clear();
+
                 //collision step
                 for (int i = 0; i < this.bodyList.Count() - 1; i++)
                 {
@@ -104,10 +108,16 @@ namespace _2DPhysics
                                 bodyB.Move(normal * depth / 2f);
                             }
 
-                            //resolve 
-                            this.ResolveCollision(bodyA, bodyB, normal, depth);
+                            _2DManifold contact = new _2DManifold(bodyA, bodyB, normal, depth, _2DVector.Zero, _2DVector.Zero, 0);
+                            this.contactList.Add(contact);
                         }
                     }
+                }
+
+                for (int i = 0; i < this.contactList.Count(); i++)
+                {
+                    //resolve
+                    this.ResolveCollision(this.contactList[i]);
                 }
             }
 
@@ -117,8 +127,13 @@ namespace _2DPhysics
         //we will resolve collisions by applying "impulses"
         //"impulse" = 1 really quick adjustment to velocity to make objects move apart in a realistic manner
         // ex. Chris Hecker -> "Rigid body dynamics", "Collision response"
-        public void ResolveCollision(_2DBody bodyA, _2DBody bodyB, _2DVector normal, float depth)
+        public void ResolveCollision(in _2DManifold contact)
         {
+            _2DBody bodyA = contact.BodyA;
+            _2DBody bodyB = contact.BodyB;
+            _2DVector normal = contact.Normal;
+            float depth = contact.Depth;
+
             _2DVector relativeVelocity = bodyB.LinearVelocity - bodyA.LinearVelocity;
 
             if (_2DMath.Dot(relativeVelocity, normal) > 0f) //objects are moving apart already
