@@ -10,8 +10,10 @@ using Flat.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using _2DPhysics;
+using _2DPhysicsGame;
+using Microsoft.Xna.Framework.Graphics;
 
-namespace _2DPhysicsEngineTester
+namespace _2DPhysicsGame
 {
     public class Game1 : Game
     {
@@ -20,6 +22,7 @@ namespace _2DPhysicsEngineTester
         private Sprites sprites;
         private Shapes shapes;
         private Camera camera;
+        private SpriteFont consolas18;
 
         private _2DWorld world;
 
@@ -29,6 +32,15 @@ namespace _2DPhysicsEngineTester
         private Vector2[] vertexBuffer;
 
         private Stopwatch watch;
+
+        private double totalWorldStepTime = 0;
+        private int totalBodyCount = 0;
+        private int totalSampleCount = 0;
+
+        private Stopwatch sampleTimer = new Stopwatch();
+
+        private string worldStepTimeString = string.Empty;
+        private string bodyCountString = string.Empty;
 
         public Game1()
         {
@@ -71,6 +83,7 @@ namespace _2DPhysicsEngineTester
             this.outlineColors.Add(Color.White);
 
             this.watch = new Stopwatch();
+            this.sampleTimer.Start();
 
             base.Initialize();
         }
@@ -78,6 +91,7 @@ namespace _2DPhysicsEngineTester
         protected override void LoadContent()
         {
             //base.LoadContent();
+            this.consolas18 = this.Content.Load<SpriteFont>("Consolas18");
         }
 
         //recursive function for the game
@@ -121,7 +135,7 @@ namespace _2DPhysicsEngineTester
                 this.colors.Add(RandomHelper.RandomColor());
                 this.outlineColors.Add(Color.White);
             }
-            
+
             if (Keyboard.IsKeyAvailable)
             {
                 if (Keyboard.IsKeyClicked(Keys.OemTilde))
@@ -163,10 +177,25 @@ namespace _2DPhysicsEngineTester
             }
 
 
+            if (this.sampleTimer.Elapsed.TotalSeconds > 1d)
+            {
+                this.bodyCountString = "BodyCount: " + Math.Round(this.totalBodyCount / (double)this.totalSampleCount, 4).ToString();
+                this.worldStepTimeString = "StepTime: " + Math.Round(this.totalWorldStepTime / (double)this.totalSampleCount, 4).ToString();
+
+                this.totalBodyCount = 0;
+                this.totalWorldStepTime = 0;
+                this.totalSampleCount = 0;
+                this.sampleTimer.Restart();
+            }
+
             //
             this.watch.Restart();
             this.world.Step(FlatUtil.GetElapsedTimeInSeconds(gameTime), 20);
             this.watch.Stop();
+
+            this.totalWorldStepTime += this.watch.Elapsed.TotalMilliseconds;
+            this.totalBodyCount += this.world.BodyCount;
+            this.totalSampleCount++;
 
             this.camera.GetExtents(out _, out _, out float viewBottom, out _);
 
@@ -179,11 +208,8 @@ namespace _2DPhysicsEngineTester
 
                 //#TODO: JD - finish body removal 12/2/24
                 //_2DAABB box = body.GetAABB();
-
-
-                
             }
-            
+
             base.Update(gameTime);
         }
 
@@ -199,7 +225,7 @@ namespace _2DPhysicsEngineTester
                 {
                     throw new Exception("");
                 }
-                
+
                 Vector2 position = _2DConverter.ToVector2(body.Position);
 
                 if (body.shapeType == ShapeType.Circle)
@@ -217,11 +243,23 @@ namespace _2DPhysicsEngineTester
                 }
             }
 
+            List<_2DVector> contactPoints = this.world?.ContactPointsList;
+            for (int i = 0; i < contactPoints.Count(); i++)
+            {
+                shapes.DrawBoxFill(_2DConverter.ToVector2(contactPoints[i]), 0.5f, 0.5f, Color.Orange);
+            }
+
+            //print output during game
+            Vector2 stringSize = this.consolas18.MeasureString(this.bodyCountString);
+            this.sprites.Begin();
+            this.sprites.DrawString(this.consolas18, this.bodyCountString, new Vector2(0, 0), Color.White);
+            this.sprites.DrawString(this.consolas18, this.worldStepTimeString, new Vector2(0, stringSize.Y), Color.White);
+            this.sprites.End();
 
             this.shapes.End();
             this.screen.Unset();
             this.screen.Present(this.sprites);
-            
+
             base.Draw(gameTime);
         }
 

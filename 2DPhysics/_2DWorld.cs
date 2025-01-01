@@ -24,6 +24,9 @@ namespace _2DPhysics
         private _2DVector gravity; //this is the acceleration due to gravity
         private List<_2DManifold> contactList;
 
+        //debgging variables
+        public List<_2DVector> ContactPointsList;
+
         public int BodyCount
         {
             get { return bodyList.Count; }
@@ -34,6 +37,8 @@ namespace _2DPhysics
             this.gravity = new _2DVector(0f, -9.81f); //earth default
             this.bodyList = new List<_2DBody>();
             this.contactList = new List<_2DManifold>();
+
+            this.ContactPointsList = new List<_2DVector>();
         }
 
         //we need functions to add / remove bodies & actually get the bodies out of the list if we need to 
@@ -67,6 +72,8 @@ namespace _2DPhysics
             //clamp # of iterations user has been through
             iterations = _2DMath.Clamp(iterations, _2DWorld.minIterations, _2DWorld.maxIterations);
 
+            this.ContactPointsList.Clear();
+
             for (int it = 0; it < iterations; it++)
             {
                 //movement step
@@ -91,9 +98,10 @@ namespace _2DPhysics
                             continue;
                         }
 
-                        //
-                        if (this.Collide(bodyA, bodyB, out _2DVector normal, out float depth))
+                        //found collision
+                        if (Collisions.Collide(bodyA, bodyB, out _2DVector normal, out float depth))
                         {
+                            //moving bodies apart
                             if (bodyA.IsStatic)
                             {
                                 bodyB.Move(normal * depth);
@@ -108,7 +116,10 @@ namespace _2DPhysics
                                 bodyB.Move(normal * depth / 2f);
                             }
 
-                            _2DManifold contact = new _2DManifold(bodyA, bodyB, normal, depth, _2DVector.Zero, _2DVector.Zero, 0);
+                            Collisions.FindContactPoint(bodyA, bodyB, out _2DVector contactPoint1, out _2DVector contactPoint2, out int contactCount);
+
+                            //saving contact information
+                            _2DManifold contact = new _2DManifold(bodyA, bodyB, normal, depth, contactPoint1, contactPoint2, contactCount);
                             this.contactList.Add(contact);
                         }
                     }
@@ -117,7 +128,18 @@ namespace _2DPhysics
                 for (int i = 0; i < this.contactList.Count(); i++)
                 {
                     //resolve
-                    this.ResolveCollision(this.contactList[i]);
+                    _2DManifold contact = this.contactList[i];
+                    this.ResolveCollision(contact);
+
+                    if (contact.ContactCount > 0)
+                    {
+                        this.ContactPointsList.Add(contact.Contact1);
+
+                        if (contact.ContactCount > 1)
+                        {
+                            this.ContactPointsList.Add(contact.Contact2);
+                        }
+                    }
                 }
             }
 
@@ -150,55 +172,6 @@ namespace _2DPhysics
 
             bodyA.LinearVelocity -= impulse * bodyA.InvMass;
             bodyB.LinearVelocity += impulse * bodyB.InvMass;
-        }
-
-        //
-        public bool Collide(_2DBody bodyA, _2DBody bodyB, out _2DVector normal, out float depth)
-        {
-            normal = _2DVector.Zero;
-            depth = 0f;
-
-            ShapeType shapeTypeA = bodyA.shapeType;
-            ShapeType shapeTypeB = bodyB.shapeType;
-
-            if (shapeTypeA == ShapeType.Box)
-            {
-                if (shapeTypeB == ShapeType.Box)
-                {
-                    return Collisions.IntersectPolygons(bodyA.Position, bodyA.GetTransformedVerticies(), 
-                                                        bodyB.Position, bodyB.GetTransformedVerticies(),
-                                                        out normal, out depth);
-                }
-                else if (shapeTypeB == ShapeType.Circle)
-                {
-                    bool result = Collisions.IntersectCirclePolygon(bodyB.Position, bodyB.Radius, 
-                                                                    bodyA.Position, bodyA.GetTransformedVerticies(),
-                                                                    out normal, out depth);
-
-                    //reverse normal here bc normal would be incorrct (to push bodyA away from bodyB)
-                    normal = -normal;
-                    return result;
-                }
-            }
-            else if (shapeTypeA == ShapeType.Circle)
-            {
-                if (shapeTypeB == ShapeType.Box)
-                {
-                    return Collisions.IntersectCirclePolygon(bodyA.Position, bodyA.Radius, 
-                                                                bodyA.Position, bodyB.GetTransformedVerticies(),
-                                                                out normal, out depth);
-                }
-                else if (shapeTypeB == ShapeType.Circle)
-                {
-                    return Collisions.IntersectCircles(bodyA.Position, bodyA.Radius, 
-                                                        bodyB.Position, bodyB.Radius,
-                                                        out normal, out depth);
-                }
-            }
-
-            //if no collision then just return false
-            return false;
-
         }
 
 

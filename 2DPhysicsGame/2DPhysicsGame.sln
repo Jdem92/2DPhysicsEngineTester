@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35327.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "2DPhysicsGame", "2DPhysicsGame.csproj", "{1CDE973F-6DB0-4966-A747-BF833B866598}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "2DPhysics", "..\2DPhysics\2DPhysics.csproj", "{360063BD-348F-4D78-A3E8-0973765B7984}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flat", "..\..\Flat\Flat.csproj", "{F6A054A5-92F0-465E-977E-303BA66ECA6E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1CDE973F-6DB0-4966-A747-BF833B866598}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CDE973F-6DB0-4966-A747-BF833B866598}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CDE973F-6DB0-4966-A747-BF833B866598}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1CDE973F-6DB0-4966-A747-BF833B866598}.Debug|x64.Build.0 = Debug|Any CPU
+		{1CDE973F-6DB0-4966-A747-BF833B866598}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CDE973F-6DB0-4966-A747-BF833B866598}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CDE973F-6DB0-4966-A747-BF833B866598}.Release|x64.ActiveCfg = Release|Any CPU
+		{1CDE973F-6DB0-4966-A747-BF833B866598}.Release|x64.Build.0 = Release|Any CPU
+		{360063BD-348F-4D78-A3E8-0973765B7984}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{360063BD-348F-4D78-A3E8-0973765B7984}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{360063BD-348F-4D78-A3E8-0973765B7984}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{360063BD-348F-4D78-A3E8-0973765B7984}.Debug|x64.Build.0 = Debug|Any CPU
+		{360063BD-348F-4D78-A3E8-0973765B7984}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{360063BD-348F-4D78-A3E8-0973765B7984}.Release|Any CPU.Build.0 = Release|Any CPU
+		{360063BD-348F-4D78-A3E8-0973765B7984}.Release|x64.ActiveCfg = Release|Any CPU
+		{360063BD-348F-4D78-A3E8-0973765B7984}.Release|x64.Build.0 = Release|Any CPU
+		{F6A054A5-92F0-465E-977E-303BA66ECA6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6A054A5-92F0-465E-977E-303BA66ECA6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6A054A5-92F0-465E-977E-303BA66ECA6E}.Debug|x64.ActiveCfg = Debug|x64
+		{F6A054A5-92F0-465E-977E-303BA66ECA6E}.Debug|x64.Build.0 = Debug|x64
+		{F6A054A5-92F0-465E-977E-303BA66ECA6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6A054A5-92F0-465E-977E-303BA66ECA6E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6A054A5-92F0-465E-977E-303BA66ECA6E}.Release|x64.ActiveCfg = Release|x64
+		{F6A054A5-92F0-465E-977E-303BA66ECA6E}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {052AA293-DA69-4646-B8D8-A8EDD9632C09}
+	EndGlobalSection
+EndGlobal
