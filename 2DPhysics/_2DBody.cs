@@ -45,8 +45,11 @@ namespace _2DPhysics
         //These are the transformed verticies
         private readonly _2DVector[] transformedVerticies;
 
+        private _2DAABB aabb;
+
         //bool to tell if transformed verticies need to be updated
         private bool transformUpdateRequied;
+        private bool aabbUpdateRequired;
 
         public readonly ShapeType shapeType;
 
@@ -114,6 +117,7 @@ namespace _2DPhysics
             }
 
             this.transformUpdateRequied = true;
+            this.aabbUpdateRequired = true;
         }
 
         private static _2DVector[] CreateBoxVerticies(float width, float height)
@@ -147,7 +151,7 @@ namespace _2DPhysics
             return triangles;
         }
 
-        public _2DVector[] GetTransformedVerticies()
+        public _2DVector[] GetTransformedVertices()
         {
             //first check array
             if (this.transformUpdateRequied)
@@ -163,6 +167,48 @@ namespace _2DPhysics
 
             this.transformUpdateRequied = false; //reset the flag
             return this.transformedVerticies;
+        }
+
+        public _2DAABB GetAABB()
+        {
+            if (this.aabbUpdateRequired)
+            {
+                float minX = float.MaxValue;
+                float minY = float.MaxValue;
+                float maxX = float.MinValue;
+                float maxY = float.MinValue;
+
+                if (this.shapeType == ShapeType.Box)
+                {
+                    _2DVector[] vertices = this.GetTransformedVertices();
+
+                    for (int i = 0; i < vertices.Length; i++)
+                    {
+                        _2DVector v = vertices[i];
+
+                        if (v.X < minX) { minX = v.X; }
+                        if (v.X > maxX) { maxX = v.X; }
+                        if (v.Y < minY) { minY = v.Y; }
+                        if (v.Y > maxY) { maxY = v.Y; }
+                    }
+                }
+                else if (this.shapeType == ShapeType.Circle)
+                {
+                    minX = this.position.X - this.Radius;
+                    minY = this.position.Y - this.Radius;
+                    maxX = this.position.X + this.Radius;
+                    maxY = this.position.Y + this.Radius;
+                }
+                else
+                {
+                    throw new Exception("Unknown ShapeType.");
+                }
+
+                this.aabb = new _2DAABB(minX, minY, maxX, maxY);
+            }
+
+            this.aabbUpdateRequired = false;
+            return this.aabb;
         }
 
         internal void Step(float time, _2DVector gravity, int iterations)
@@ -187,18 +233,21 @@ namespace _2DPhysics
 
             this.force = _2DVector.Zero;
             this.transformUpdateRequied = true;
+            this.aabbUpdateRequired = true;
         }
 
         public void Move(_2DVector amount)
         {
             this.position += amount;
             this.transformUpdateRequied = true;
+            this.aabbUpdateRequired = true;
         }
 
         public void MoveTo(_2DVector position)
         {
             this.position = position;
             this.transformUpdateRequied = true;
+            this.aabbUpdateRequired = true;
         }
 
         //function that allows us to rotate
@@ -206,6 +255,7 @@ namespace _2DPhysics
         {
             this.rotation += amount;
             this.transformUpdateRequied = true;
+            this.aabbUpdateRequired = true;
         }
         
         public void AddForce(_2DVector amount)

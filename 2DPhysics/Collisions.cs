@@ -9,6 +9,17 @@ namespace _2DPhysics
     public static class Collisions
     {
 
+        //Axis aligned bounding box [ ] <--> [ ] comparing edges of objects
+        public static bool IntersectAABB(_2DAABB a, _2DAABB b)
+        {
+            if (a.Max.X <= b.Min.X || b.Max.X <= a.Min.X ||
+                a.Max.Y <= b.Min.Y || b.Max.Y <= a.Min.Y)
+            {
+                return false;
+            }
+            return true;
+        }
+
         public static void FindContactPoint(_2DBody bodyA, _2DBody bodyB, out _2DVector contactPoint1, out _2DVector contactPoint2, out int contactCount)
         {
             contactPoint1 = _2DVector.Zero;
@@ -68,14 +79,14 @@ namespace _2DPhysics
             {
                 if (shapeTypeB == ShapeType.Box)
                 {
-                    return Collisions.IntersectPolygons(bodyA.Position, bodyA.GetTransformedVerticies(),
-                                                        bodyB.Position, bodyB.GetTransformedVerticies(),
+                    return Collisions.IntersectPolygons(bodyA.Position, bodyA.GetTransformedVertices(),
+                                                        bodyB.Position, bodyB.GetTransformedVertices(),
                                                         out normal, out depth);
                 }
                 else if (shapeTypeB == ShapeType.Circle)
                 {
                     bool result = Collisions.IntersectCirclePolygon(bodyB.Position, bodyB.Radius,
-                                                                    bodyA.Position, bodyA.GetTransformedVerticies(),
+                                                                    bodyA.Position, bodyA.GetTransformedVertices(),
                                                                     out normal, out depth);
 
                     //reverse normal here bc normal would be incorrct (to push bodyA away from bodyB)
@@ -88,7 +99,7 @@ namespace _2DPhysics
                 if (shapeTypeB == ShapeType.Box)
                 {
                     return Collisions.IntersectCirclePolygon(bodyA.Position, bodyA.Radius,
-                                                                bodyA.Position, bodyB.GetTransformedVerticies(),
+                                                                bodyA.Position, bodyB.GetTransformedVertices(),
                                                                 out normal, out depth);
                 }
                 else if (shapeTypeB == ShapeType.Circle)

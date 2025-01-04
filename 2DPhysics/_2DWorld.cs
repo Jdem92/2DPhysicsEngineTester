@@ -88,10 +88,18 @@ namespace _2DPhysics
                 for (int i = 0; i < this.bodyList.Count() - 1; i++)
                 {
                     _2DBody bodyA = this.bodyList[i];
+                    _2DAABB bodyA_aabb = bodyA.GetAABB();
 
                     for (int j = i + 1; j < this.bodyList.Count(); j++)
                     {
                         _2DBody bodyB = this.bodyList[j];
+                        _2DAABB bodyB_aabb = bodyB.GetAABB();
+
+                        //test axis aligned box for intersection
+                        if (!Collisions.IntersectAABB(bodyA_aabb, bodyB_aabb))
+                        {
+                            continue;
+                        }
 
                         if (bodyA.IsStatic && bodyB.IsStatic)
                         {

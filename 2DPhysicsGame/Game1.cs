@@ -237,7 +237,7 @@ namespace _2DPhysicsGame
                 {
                     //shapes.DrawBox(position, body.Width, body.Height, Color.White);
 
-                    _2DConverter.ToVector2Array(body.GetTransformedVerticies(), ref this.vertexBuffer);
+                    _2DConverter.ToVector2Array(body.GetTransformedVertices(), ref this.vertexBuffer);
                     shapes.DrawPolygonFill(this.vertexBuffer, body.triangles, this.colors[i]);
                     shapes.DrawPolygon(this.vertexBuffer, this.outlineColors[i]);
                 }
