@@ -141,11 +141,17 @@ namespace _2DPhysics
 
                     if (contact.ContactCount > 0)
                     {
-                        this.ContactPointsList.Add(contact.Contact1);
+                        if (!this.ContactPointsList.Contains(contact.Contact1))
+                        {
+                            this.ContactPointsList.Add(contact.Contact1);
+                        }
 
                         if (contact.ContactCount > 1)
                         {
-                            this.ContactPointsList.Add(contact.Contact2);
+                            if (!this.ContactPointsList.Contains(contact.Contact2))
+                            {
+                                this.ContactPointsList.Add(contact.Contact2);
+                            }
                         }
                     }
                 }

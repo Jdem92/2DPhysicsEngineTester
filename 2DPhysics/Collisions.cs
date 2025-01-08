@@ -9,6 +9,34 @@ namespace _2DPhysics
     public static class Collisions
     {
 
+        //this will return the distance between a line segment and a point
+        //it will also return the actual contact point (closest point in space)
+        //https://www.youtube.com/watch?v=egmZJU-1zPU&t=0s
+        public static void PointSegmentDistance(_2DVector p, _2DVector a, _2DVector b, out float distanceSquared, out _2DVector closestPoint)
+        {
+            _2DVector ab = b - a;
+            _2DVector ap = p - a;
+
+            float proj = _2DMath.Dot(ap, ab);
+            float abLengthSquared = _2DMath.LengthSquared(ab);
+            float d = proj / abLengthSquared;
+
+            if (d <= 0f)
+            {
+                closestPoint = a;
+            } 
+            else if (d >= 1f)
+            {
+                closestPoint = b;
+            }
+            else
+            {
+                closestPoint = a + ab * d;
+            }
+
+            distanceSquared = _2DMath.DistanceSquared(p, closestPoint);
+        }
+
         //Axis aligned bounding box [ ] <--> [ ] comparing edges of objects
         public static bool IntersectAABB(_2DAABB a, _2DAABB b)
         {
@@ -33,18 +61,20 @@ namespace _2DPhysics
             {
                 if (shapeTypeB == ShapeType.Box)
                 {
-
+                    Collisions.FindContactPoint(bodyA.GetTransformedVertices(), bodyB.GetTransformedVertices(), out contactPoint1, out contactPoint2, out contactCount);
                 }
                 else if (shapeTypeB == ShapeType.Circle)
                 {
-
+                    Collisions.FindContactPoint(bodyB.Position, bodyB.Radius, bodyA.Position, bodyA.GetTransformedVertices(), out contactPoint1);
+                    contactCount = 1;
                 }
             }
             else if (shapeTypeA == ShapeType.Circle)
             {
                 if (shapeTypeB == ShapeType.Box)
                 {
-
+                    Collisions.FindContactPoint(bodyA.Position, bodyA.Radius, bodyB.Position, bodyB.GetTransformedVertices(), out contactPoint1);
+                    contactCount = 1;
                 }
                 else if (shapeTypeB == ShapeType.Circle)
                 {
@@ -54,6 +84,97 @@ namespace _2DPhysics
             }
         }
 
+        //
+        private static void FindContactPoint(_2DVector[] verticesA, _2DVector[] verticesB, out _2DVector contact1, out _2DVector contact2, out int contactCount)
+        {
+            contact1 = _2DVector.Zero;
+            contact2 = _2DVector.Zero;
+            contactCount = 0;
+
+            float minDistanceSquared = float.MaxValue;
+
+            for (int i = 0; i < verticesA.Count(); i++)
+            {
+                _2DVector p = verticesA[i];
+
+                for (int j = 0; j < verticesB.Count(); j++)
+                {
+                    //get edges
+                    _2DVector va = verticesB[j];
+                    _2DVector vb = verticesB[(j + 1) % verticesB.Length];
+
+                    Collisions.PointSegmentDistance(p, va, vb, out float distanceSquared, out _2DVector contactPoint);
+
+                    if (_2DMath.NearlyEqual(distanceSquared, minDistanceSquared)) //distance is the same, comparing floating point values
+                    {
+                        if (!_2DMath.NearlyEqual(contactPoint, contact1))
+                        {
+                            contact2 = contactPoint;
+                            contactCount = 2;
+                        }
+                    }
+                    else if (distanceSquared < minDistanceSquared)
+                    {
+                        minDistanceSquared = distanceSquared;
+                        contactCount = 1;
+                        contact1 = contactPoint;
+                    }
+                }
+            }
+
+            for (int i = 0; i < verticesB.Count(); i++)
+            {
+                _2DVector p = verticesB[i];
+
+                for (int j = 0; j < verticesA.Count(); j++)
+                {
+                    //get edges
+                    _2DVector va = verticesA[j];
+                    _2DVector vb = verticesA[(j + 1) % verticesA.Length];
+
+                    Collisions.PointSegmentDistance(p, va, vb, out float distanceSquared, out _2DVector contactPoint);
+
+                    //
+                    if (_2DMath.NearlyEqual(distanceSquared, minDistanceSquared)) //distance is the same, comparing floating point values
+                    {
+                        if (!_2DMath.NearlyEqual(contactPoint, contact1))
+                        {
+                            contact2 = contactPoint;
+                            contactCount = 2;
+                        }
+
+                    }
+                    else if (distanceSquared < minDistanceSquared)
+                    {
+                        minDistanceSquared = distanceSquared;
+                        contactCount = 1;
+                        contact1 = contactPoint;
+                    }
+                }
+            }
+        }
+
+        
+        private static void FindContactPoint(_2DVector circleCenter, float circleRadius, _2DVector polygonCenter, _2DVector[] polygonVertices, out _2DVector cp)
+        {
+            cp = _2DVector.Zero;
+            float minDistanceSquared = float.MaxValue; 
+
+            //loop through every edge of the polygon, loop through vertices
+            for (int i = 0; i < polygonVertices.Count(); i++)
+            {
+                _2DVector va = polygonVertices[i]; //point va for current vertex
+                _2DVector vb = polygonVertices[(i + 1) % polygonVertices.Length]; //loop back around if we get to the end of the vertice
+
+                Collisions.PointSegmentDistance(circleCenter, va, vb, out float distanceSquared, out _2DVector contact);
+
+                if (distanceSquared < minDistanceSquared)
+                {
+                    minDistanceSquared = distanceSquared;
+                    cp = contact;
+                }
+            }
+        }
 
         //circle to circle collision (1 contact point)
         private static void FindContactPoint(_2DVector centerA, float radiusA, _2DVector centerB, out _2DVector contactPoint)
@@ -64,7 +185,6 @@ namespace _2DPhysics
             _2DVector directionVector = _2DMath.Normalize(ab);
             contactPoint = centerA + directionVector * radiusA;
         }
-
 
         //
         public static bool Collide(_2DBody bodyA, _2DBody bodyB, out _2DVector normal, out float depth)

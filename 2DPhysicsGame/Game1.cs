@@ -246,7 +246,8 @@ namespace _2DPhysicsGame
             List<_2DVector> contactPoints = this.world?.ContactPointsList;
             for (int i = 0; i < contactPoints.Count(); i++)
             {
-                shapes.DrawBoxFill(_2DConverter.ToVector2(contactPoints[i]), 0.5f, 0.5f, Color.Orange);
+                Vector2 contactPosition = _2DConverter.ToVector2(contactPoints[i]);
+                shapes.DrawBoxFill(contactPosition, 0.3f, 0.3f, Color.Orange);
             }
 
             //print output during game

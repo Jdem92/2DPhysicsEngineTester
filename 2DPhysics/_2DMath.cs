@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,6 +9,8 @@ namespace _2DPhysics
 {
     public static class _2DMath
     {
+        public static readonly float HalfAMillimeter = 0.0005f;
+
         public static float Clamp(float value, float min, float max)
         {
             if (min == max)
@@ -66,6 +69,11 @@ namespace _2DPhysics
             return MathF.Sqrt(v.X * v.X + v.Y * v.Y);
         }
 
+        public static float LengthSquared(_2DVector v)
+        {
+            return v.X * v.X + v.Y * v.Y;
+        }
+
         //we're computing the distance between the ends of 2 vectors (points in space)
         //
         public static float Distance(_2DVector a, _2DVector b)
@@ -73,6 +81,14 @@ namespace _2DPhysics
             float dx = a.X - b.X; //"delta x"
             float dy = a.Y - b.Y; //"delta y"
             return MathF.Sqrt(dx * dx + dy * dy); //pythagorean theorem
+        }
+
+        public static float DistanceSquared(_2DVector a, _2DVector b)
+        {
+            float dx = a.X - b.X;
+            float dy = a.Y - b.Y;
+
+            return dx * dx + dy * dy;
         }
 
         //vectors have a direction and a magnitude
@@ -100,6 +116,17 @@ namespace _2DPhysics
         public static float Cross(_2DVector a, _2DVector b)
         {
             return a.X * b.Y - a.Y * b.X;
+        }
+
+        //if less than half a millimeter apart
+        public static bool NearlyEqual(float a, float b)
+        {
+            return Math.Abs(a - b) < _2DMath.HalfAMillimeter;
+        }
+
+        public static bool NearlyEqual(_2DVector a, _2DVector b)
+        {
+            return _2DMath.NearlyEqual(a.X, b.X) && _2DMath.NearlyEqual(a.Y, b.Y);
         }
     }
 }
